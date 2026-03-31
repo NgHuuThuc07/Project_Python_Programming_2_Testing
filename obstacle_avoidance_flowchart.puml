@@ -1,0 +1,72 @@
+@startuml Obstacle_Avoidance
+
+title Car — Obstacle Avoidance Logic
+
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam backgroundColor #FAFAFA
+
+skinparam activity {
+  BackgroundColor #2E4A7A
+  BorderColor #1a2e50
+  FontColor #FFFFFF
+  FontSize 13
+  ArrowColor #2E4A7A
+  ArrowFontColor #333333
+  DiamondBackgroundColor #c0392b
+  DiamondBorderColor #922b21
+  DiamondFontColor #FFFFFF
+}
+
+skinparam startColor #27ae60
+skinparam endColor #c0392b
+
+start
+
+:Xe di chuyen ve phia dich;
+
+repeat
+
+  :Quet 3 tia cam bien\n(Trai / Giua / Phai);
+
+  if (Co vat can\nphia truoc?\ndc < 1.04m) then (CO)
+
+    if (Ben TRAI\nthong thoang hon?\ndl >= dr) then (CO)
+
+      :QUEO TRAI\nv = 1.5 m/s\nomega = +1.6 rad/s;
+
+    else (KHONG)
+
+      :QUEO PHAI\nv = 1.5 m/s\nomega = -1.6 rad/s;
+
+    endif
+
+  elseif (Dang sat\ntuong TRAI?\ndl < 0.83m) then (CO)
+
+    :TRANH SANG PHAI\nv = 1.5 m/s\nomega = -1.6 rad/s;
+
+  elseif (Dang sat\ntuong PHAI?\ndr < 0.83m) then (CO)
+
+    :TRANH SANG TRAI\nv = 1.5 m/s\nomega = +1.6 rad/s;
+
+  else (DUONG THONG)
+
+    :DI THANG ve dich\nv = 2.5 m/s\nChinh huong tu dong;
+
+  endif
+
+repeat while (Chua den dich?) is (CHUA)
+-> DA DEN;
+
+:DUNG LAI;
+
+stop
+
+legend right
+  |= Mau |= Y nghia |
+  |<#2E4A7A>  | Hanh dong |
+  |<#c0392b>  | Quyet dinh |
+  |<#27ae60>  | Bat dau |
+endlegend
+
+@enduml
