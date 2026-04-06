@@ -44,14 +44,15 @@ python car_controller.py
 
 | Element                | Description                       |
 |------------------------|-----------------------------------|
-| 🟢 Green disc         | Start position `(-6.0, 0.0)`      |
-| 🟡 Yellow disc + pole | Goal position `(6.0, 0.0)`        |
-| 🔴 Red boxes          | 5 static obstacles                |
+| 🟢 Green disc         | Start position `(-10.0, 0.0)`     |
+| 🟡 Yellow disc + pole | Goal position `(10.0, 0.0)`       |
+| 🔴 Red boxes          | 6 static obstacles and 1 wall     |
 | 🔵 Blue car           | Autonomous vehicle with freejoint |
 | 🟢 Green dot          | Front sensor indicator            |
 
 **Obstacle positions (from `world.xml`):**
 
+Blocks
 | Name | X    | Y    | Size|
 |------|------|------|-----|
 | obs1 | -3.0 | +1.2 | 0.5 |
@@ -59,6 +60,15 @@ python car_controller.py
 | obs3 | +2.0 | +1.5 | 0.5 |
 | obs4 | +3.0 | -0.3 | 0.5 |
 | obs5 |  0.0 |  0.0 | 0.4 |
+| obs6 |  5.0 |  2.0 | 0.6 |
+Wall
+| Name | X    | Y    | Size|
+|------|------|------|-----|
+| part1| 8.0  |  2.0 | 0.5 |
+| part2| 8.0  |  1.0 | 0.5 |
+| part3| 8.0  |  0.0 | 0.5 |
+| part4| 8.0  | -1.0 | 0.5 |
+| part5| 8.0  | -2.0 | 0.5 |
 
 ---
 
@@ -69,15 +79,23 @@ All parameters are in one place — edit `car_controller.py`:
 ```python
 @dataclass
 class Config:
-    start       = (-6.0, 0.0)   # Start position (x, y)
-    goal        = ( 6.0, 0.0)   # Goal  position (x, y)
+    start       = (-10.0, 0.0)   # Start position (x, y)
+    goal        = ( 10.0, 0.0)   # Goal  position (x, y)
 
     obstacles   = [              # (x, y, half_size)
+#Blocks
         (-3.0,  1.2, 0.5),
         (-1.0, -1.0, 0.5),
         ( 2.0,  1.5, 0.5),
         ( 3.0, -0.3, 0.5),
         ( 0.0,  0.0, 0.4),
+        ( 5.0,  2.0, 0.6),
+#Wall
+        ( 8.0,  2.0, 0.5),
+        ( 8.0,  1.0, 0.5),  
+        ( 8.0,  0.0, 0.5), 
+        ( 8.0, -1.0, 0.5),  
+        ( 8.0, -2.0, 0.5)  
     ]
 
     forward_vel = 2.5   # m/s — straight speed
