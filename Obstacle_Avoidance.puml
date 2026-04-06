@@ -1,0 +1,59 @@
+@startuml Obstacle_Avoidance
+
+title Car — Obstacle Avoidance Logic
+
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam backgroundColor #FAFAFA
+
+skinparam activity {
+  BackgroundColor #2E4A7A
+  BorderColor #1a2e50
+  FontColor #FFFFFF
+  FontSize 13
+  ArrowColor #2E4A7A
+  ArrowFontColor #333333
+  DiamondBackgroundColor #c0392b
+  DiamondBorderColor #922b21
+  DiamondFontColor #FFFFFF
+}
+
+skinparam startColor #27ae60
+skinparam endColor #c0392b
+
+start
+
+:The car is moving towards the finish line;
+
+repeat
+
+  :3-way scanning sensor\n(Left / Center / Right);
+    if (There is an \nobstacle ahead?) then (Yes)
+
+      if (Is the left side clear??) then (Yes)
+
+        :Turn left;
+
+      else (No)
+
+        :Turn right;
+      endif
+    
+    else (No)
+        if (Near the wall??) then (Left)
+          :Go to the right;
+        else (Right)
+          :Go to the left;
+        endif
+    endif
+  
+
+repeat while (Have you reached your \ndestination yet? ?) is (No)
+-> Yes;
+
+:STOP;
+
+stop
+
+
+@enduml

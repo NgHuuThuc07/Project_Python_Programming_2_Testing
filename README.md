@@ -17,10 +17,7 @@ project/
 ├── car_controller.py       ← Main simulation controller
 ├── world.xml               ← MuJoCo scene (car, obstacles, ground)
 ├── Obstacle_Avoidance.puml ← PlantUML flowchart of avoidance logic
-└── output/                 ← Auto-generated on run
-    ├── simulation_log.json
-    ├── trajectory.png
-    └── metrics.png
+
 ```
 
 ---
@@ -30,8 +27,7 @@ project/
 ```bash
 pip install mujoco mujoco-python-viewer numpy matplotlib
 ```
-
-> **Requirements:** Python ≥ 3.9, No GPU needed
+>Python ≥ 3.9, No GPU needed
 
 ---
 
@@ -40,27 +36,24 @@ pip install mujoco mujoco-python-viewer numpy matplotlib
 ```bash
 # With 3D viewer window
 python car_controller.py
-
-# Headless (no window, outputs plots only)
-python car_controller.py --headless
 ```
 
 ---
 
 ## 🗺️ Scene Overview
 
-| Element | Description |
-|---|---|
-| 🟢 Green disc | Start position `(-6.0, 0.0)` |
-| 🟡 Yellow disc + pole | Goal position `(6.0, 0.0)` |
-| 🔴 Red boxes | 5 static obstacles |
-| 🔵 Blue car | Autonomous vehicle with freejoint |
-| 🟢 Green dot | Front sensor indicator |
+| Element                | Description                       |
+|------------------------|-----------------------------------|
+| 🟢 Green disc         | Start position `(-6.0, 0.0)`      |
+| 🟡 Yellow disc + pole | Goal position `(6.0, 0.0)`        |
+| 🔴 Red boxes          | 5 static obstacles                |
+| 🔵 Blue car           | Autonomous vehicle with freejoint |
+| 🟢 Green dot          | Front sensor indicator            |
 
 **Obstacle positions (from `world.xml`):**
 
-| Name | X | Y | Size |
-|---|---|---|---|
+| Name | X    | Y    | Size|
+|------|------|------|-----|
 | obs1 | -3.0 | +1.2 | 0.5 |
 | obs2 | -1.0 | -1.0 | 0.5 |
 | obs3 | +2.0 | +1.5 | 0.5 |
@@ -69,7 +62,7 @@ python car_controller.py --headless
 
 ---
 
-## 🔧 Configuration (`Config` class)
+## 🔧 Configuration
 
 All parameters are in one place — edit `car_controller.py`:
 
@@ -97,29 +90,15 @@ class Config:
     sim_hz      = 40.0  # Hz — display speed (lower = slower)
 ```
 
-> ⚠️ When changing **obstacle positions**, update **both** `Config.obstacles` in `car_controller.py` **and** the `<geom>` positions in `world.xml` to stay in sync.
+> ⚠️ When changing **obstacle positions**, update **both** `obstacles` in `car_controller.py` **and** the `<geom>` positions in `world.xml` to stay in sync.
 
 ---
 
 ## 🧠 How It Works
 
-### System Architecture
-
-```
-┌─────────────────────────────────────────────┐
-│              Simulation Loop                │
-│                                             │
-│  RayCastSensor  →  CarFSM  →  set_vel()    │
-│   (3 ray scan)    (decide)   (apply cmd)   │
-│        ↑                         ↓         │
-│    get_state()          mujoco.mj_step()   │
-│   (pos, yaw)              (physics dt)     │
-└─────────────────────────────────────────────┘
-```
-
 ### 1. Virtual Ray-Cast Sensor
 
-Three rays are cast analytically from the car front using AABB slab intersection:
+Three rays are cast analytically from the car front:
 
 ```
 ray_left   = yaw + 0.55 rad
@@ -154,32 +133,16 @@ Danger threshold: th = 2.0 × 0.52 = 1.04 m
 
 ### 3. Control Output per State
 
-| State | Speed (v) | Angular vel (ω) | Description |
-|---|---|---|---|
-| `FORWARD` | 2.5 m/s | `clip(2.2 × herr, ±1.6)` | Straight + heading correction |
-| `AVOID_L` | 1.5 m/s | +1.6 rad/s | Turn left |
-| `AVOID_R` | 1.5 m/s | −1.6 rad/s | Turn right |
-| `ARRIVED` | 0 m/s | 0 rad/s | Stop at goal |
+| State     | Speed (v) | Angular vel (ω)          | Description                   |
+|-----------|-----------|--------------------------|-------------------------------|
+| `FORWARD` | 2.5 m/s   | `clip(2.2 × herr, ±1.6)` | Straight + heading correction |
+| `AVOID_L` | 1.5 m/s   | +1.6 rad/s               | Turn left                     |
+| `AVOID_R` | 1.5 m/s   | −1.6 rad/s               | Turn right                    |
+| `ARRIVED` | 0 m/s     | 0 rad/s                  | Stop at goal                  |
 
 ---
 
 ## 🔷 Flowchart (PlantUML)
-
-The file `Obstacle_Avoidance.puml` contains the flowchart of the avoidance logic. To render it:
-
-**Option 1 — Online (no install):**
-1. Go to [https://www.plantuml.com/plantuml](https://www.plantuml.com/plantuml)
-2. Paste the content of `Obstacle_Avoidance.puml`
-3. Export as PNG or SVG
-
-**Option 2 — VS Code:**
-Install the extension **PlantUML** by `jebbs`, then open the `.puml` file and press `Alt+D` to preview.
-
-**Option 3 — Command line:**
-```bash
-pip install plantuml
-plantuml Obstacle_Avoidance.puml
-```
 
 **Flowchart summary:**
 ```
@@ -195,27 +158,6 @@ START
        └─ Reached goal? → STOP
 END
 ```
-
----
-
-## 📊 Output Files
-
-After simulation ends (close the viewer window):
-
-| File | Description |
-|---|---|
-| `output/trajectory.png` | Top-down map of car path, colored by FSM state |
-| `output/metrics.png` | Time-series: speed, angular rate, sensor distances |
-| `output/simulation_log.json` | Raw data every step (pos, yaw, state, v, ω, sensors) |
-
-**Trajectory color legend:**
-
-| Color | State |
-|---|---|
-| 🔵 Blue | FORWARD |
-| 🟠 Orange | AVOID_L |
-| 🟢 Green | AVOID_R |
-| 🟣 Purple | ARRIVED |
 
 ---
 
@@ -237,11 +179,3 @@ Key settings:
 | Physics joint | `freejoint` | 6 DOF free movement |
 
 ---
-
-## 🔮 Possible Extensions
-
-- **Multiple waypoints** — Replace single goal with a list of waypoints
-- **Dynamic obstacles** — Give obstacles velocity in XML
-- **Potential Field** — Upgrade FSM to gradient-based avoidance
-- **Reinforcement Learning** — Wrap as Gymnasium env, train with Stable-Baselines3
-- **Live viewer** — Enable `mujoco.viewer` with MuJoCo ≥ 3.0

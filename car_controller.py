@@ -1,12 +1,14 @@
 """
-VIETNAMESE-GERMAN UNIVERSITY
-Course: Programming method 2
-Instructor: Bien Minh Tri
-Major: Mechatronics
-Group menbers: 
-- Nguyễn Hữu Thức 11525034
-- Trần Đức Minh 11525063
-- Nguyễn Cảnh Nhật Nguyên 11525051
+MuJoCo Car Simulation — Rule-Based Obstacle Avoidance
+
+> **Vietnamese-German University**  
+> Course: Programming Methods 2 | Instructor: Bien Minh Tri | Major: Mechatronics
+
+**Group Members:**
+- Nguyễn Hữu Thức — 11525034
+- Trần Đức Minh — 11525063
+- Nguyễn Cảnh Nhật Nguyên — 11525051
+
 """
 import argparse, os, sys, time, json
 import numpy as np
@@ -29,7 +31,7 @@ class Config:
     goal        : tuple = ( 6.0, 0.0)
     obstacles   : list  = field(default_factory=lambda: [
         (-3.0,  1.2, 0.5), (-1.0, -1.0, 0.5),
-        ( 2.0,  1.5, 0.5), ( 3.0, -0.3, 0.5),
+        ( 2.0,  1.5, 0.5), ( 3.0, -0.3, 0.5),  #replace by  ( 1.0,  1.5, 0.5),( 3.0, -1.3, 0.5) to have new direction for car
         ( 0.0,  0.0, 0.4),
     ])
     forward_vel : float = 2.5
