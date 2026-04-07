@@ -13,10 +13,7 @@ MuJoCo Car Simulation — Rule-Based Obstacle Avoidance
 import argparse, os, sys, time, json
 import numpy as np
 import mujoco
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
+
 from dataclasses import dataclass, field
 from typing import List, Tuple
 
@@ -27,12 +24,18 @@ _XML    = os.path.join(_HERE, "world.xml")          # same folder as .py
 @dataclass
 class Config:
     xml_path    : str   = _XML
-    start       : tuple = (-6.0, 0.0)
-    goal        : tuple = ( 6.0, 0.0)
+    start       : tuple = (-10.0, 0.0)
+    goal        : tuple = ( 10.0, 0.0)
     obstacles   : list  = field(default_factory=lambda: [
         (-3.0,  1.2, 0.5), (-1.0, -1.0, 0.5),
         ( 2.0,  1.5, 0.5), ( 3.0, -0.3, 0.5),  #replace by  ( 1.0,  1.5, 0.5),( 3.0, -1.3, 0.5) to have new direction for car
-        ( 0.0,  0.0, 0.4),
+        ( 0.0,  0.0, 0.4), ( 5.0,  2.0, 0.6),
+
+        ( 8.0,  2.0, 0.5),  # Create the wall
+        ( 8.0,  1.0, 0.5),  
+        ( 8.0,  0.0, 0.5),  
+        ( 8.0, -1.0, 0.5),  
+        ( 8.0, -2.0, 0.5)   
     ])
     forward_vel : float = 2.5
     turn_vel    : float = 1.5
@@ -85,14 +88,14 @@ class CarFSM:
         self.cfg = cfg; self.state = self.FORWARD
 
     def step(self, dc, dl, dr, herr):
-        cfg = self.cfg; th = cfg.sense_range * 0.52
+        cfg = self.cfg; th = cfg.sense_range * 0.67
         if self.state == self.ARRIVED: return 0.0, 0.0
         if   dc < th:        self.state = self.AVOID_L if dl >= dr else self.AVOID_R
         elif dl < th * 0.80: self.state = self.AVOID_R
         elif dr < th * 0.80: self.state = self.AVOID_L
         else:                self.state = self.FORWARD
         if   self.state == self.FORWARD:
-            return cfg.forward_vel, float(np.clip(2.2*herr, -cfg.turn_rate, cfg.turn_rate))
+            return cfg.forward_vel, float(np.clip(2.3*herr, -cfg.turn_rate, cfg.turn_rate))
         elif self.state == self.AVOID_L: return cfg.turn_vel, +cfg.turn_rate
         elif self.state == self.AVOID_R: return cfg.turn_vel, -cfg.turn_rate
         return 0.0, 0.0
@@ -135,11 +138,7 @@ class Logger:
 
 # ── Viewer launcher ───────────────────────────────────────────
 def try_launch_viewer(model, data):
-    """
-    Thu tu: mujoco.viewer (v3.x) -> mujoco_viewer -> OpenCV fallback
-    Tra ve (viewer_obj, mode_string)
-    """
-    # 1) MuJoCo built-in viewer (>= 3.x)
+    # 1) MuJoCo built-in viewer
     try:
         import mujoco.viewer as _mv
         viewer = _mv.launch_passive(model, data)
@@ -198,7 +197,7 @@ def run(cfg: Config, headless=False):
     print(f"  Obstacles : {len(cfg.obstacles)}")
     print("="*58 + "\n")
     if mode != "headless":
-        print("  [VIEWER] Cua so 3D da mo. Dong cua so de ket thuc.\n")
+        print("  [VIEWER] The 3D window is open. Close the window to finish.\n")
 
     step_time = 1.0 / cfg.sim_hz
 
@@ -263,6 +262,16 @@ def run(cfg: Config, headless=False):
             if slp > 0: time.sleep(slp)
 
         step += 1
+        # ── Render ──────────────────────────────────────────
+        if mode == "builtin":
+            try:
+                if not viewer.is_running(): break
+                # Car tracking camera:
+                viewer.cam.lookat[0] = pos[0]
+                viewer.cam.lookat[1] = pos[1]
+                
+                viewer.sync()
+            except: break
 
     if not arrived:
         print(f"\n  Max steps {cfg.max_steps} reached.\n")
@@ -273,6 +282,6 @@ def run(cfg: Config, headless=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--headless", action="store_true", help="Khong mo cua so 3D")
+    parser.add_argument("--headless", action="store_true", help="Do not open the 3D window.")
     args = parser.parse_args()
     run(Config(), headless=args.headless)

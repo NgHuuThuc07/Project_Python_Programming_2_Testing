@@ -37,16 +37,15 @@ pip install mujoco mujoco-python-viewer numpy matplotlib
 # With 3D viewer window
 python car_controller.py
 ```
-
 ---
 
 ## 🗺️ Scene Overview
 
 | Element                | Description                       |
 |------------------------|-----------------------------------|
-| 🟢 Green disc         | Start position `(-6.0, 0.0)`      |
-| 🟡 Yellow disc + pole | Goal position `(6.0, 0.0)`        |
-| 🔴 Red boxes          | 5 static obstacles                |
+| 🟢 Green disc         | Start position `(-10.0, 0.0)`     |
+| 🟡 Yellow disc + pole | Goal position `(10.0, 0.0)`       |
+| 🔴 Red boxes          | 6 static obstacles and 1 wall     |
 | 🔵 Blue car           | Autonomous vehicle with freejoint |
 | 🟢 Green dot          | Front sensor indicator            |
 
@@ -59,7 +58,15 @@ python car_controller.py
 | obs3 | +2.0 | +1.5 | 0.5 |
 | obs4 | +3.0 | -0.3 | 0.5 |
 | obs5 |  0.0 |  0.0 | 0.4 |
-
+| obs6 |  5.0 |  2.0 | 0.6 |
+Wall
+| Name | X    | Y    | Size|
+|------|------|------|-----|
+| part1| 8.0  |  2.0 | 0.5 |
+| part2| 8.0  |  1.0 | 0.5 |
+| part3| 8.0  |  0.0 | 0.5 |
+| part4| 8.0  | -1.0 | 0.5 |
+| part5| 8.0  | -2.0 | 0.5 |
 ---
 
 ## 🔧 Configuration
@@ -69,8 +76,8 @@ All parameters are in one place — edit `car_controller.py`:
 ```python
 @dataclass
 class Config:
-    start       = (-6.0, 0.0)   # Start position (x, y)
-    goal        = ( 6.0, 0.0)   # Goal  position (x, y)
+    start       = (-10.0, 0.0)   # Start position (x, y)
+    goal        = ( 10.0, 0.0)   # Goal  position (x, y)
 
     obstacles   = [              # (x, y, half_size)
         (-3.0,  1.2, 0.5),
@@ -78,6 +85,13 @@ class Config:
         ( 2.0,  1.5, 0.5),
         ( 3.0, -0.3, 0.5),
         ( 0.0,  0.0, 0.4),
+        ( 5.0,  2.0, 0.6),
+
+        ( 8.0,  2.0, 0.5),  # Create the wall
+        ( 8.0,  1.0, 0.5),  
+        ( 8.0,  0.0, 0.5),  
+        ( 8.0, -1.0, 0.5),  
+        ( 8.0, -2.0, 0.5)   
     ]
 
     forward_vel = 2.5   # m/s — straight speed
@@ -112,12 +126,12 @@ Max range: 2.0 m
 ### 2. Obstacle Avoidance Logic (FSM)
 
 ```
-Danger threshold: th = 2.0 × 0.52 = 1.04 m
+Danger threshold: th = 2.0 × 0.67 = 1.04 m
 ```
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│  IF dc < 1.04m   (obstacle dead ahead)              │
+│  IF dc < 1.34m   (obstacle dead ahead)              │
 │     IF dl >= dr  → AVOID_L  (turn left)             │
 │     ELSE         → AVOID_R  (turn right)            │
 │                                                     │
@@ -135,7 +149,7 @@ Danger threshold: th = 2.0 × 0.52 = 1.04 m
 
 | State     | Speed (v) | Angular vel (ω)          | Description                   |
 |-----------|-----------|--------------------------|-------------------------------|
-| `FORWARD` | 2.5 m/s   | `clip(2.2 × herr, ±1.6)` | Straight + heading correction |
+| `FORWARD` | 2.5 m/s   | `clip(2.3 × herr, ±1.6)` | Straight + heading correction |
 | `AVOID_L` | 1.5 m/s   | +1.6 rad/s               | Turn left                     |
 | `AVOID_R` | 1.5 m/s   | −1.6 rad/s               | Turn right                    |
 | `ARRIVED` | 0 m/s     | 0 rad/s                  | Stop at goal                  |
@@ -145,20 +159,8 @@ Danger threshold: th = 2.0 × 0.52 = 1.04 m
 ## 🔷 Flowchart (PlantUML)
 
 **Flowchart summary:**
-```
-START
-  └─ Car moves toward goal
-       └─ [Loop] Scan 3 sensors
-              ├─ Obstacle ahead?
-              │     ├─ Left clear? → Turn LEFT
-              │     └─ Right clear? → Turn RIGHT
-              ├─ Near left wall? → Steer RIGHT
-              ├─ Near right wall? → Steer LEFT
-              └─ All clear? → Go STRAIGHT
-       └─ Reached goal? → STOP
-END
-```
 
+![Image](Flowchart%20car%20logic.jpg)
 ---
 
 ## 🌐 MuJoCo World (`world.xml`)
