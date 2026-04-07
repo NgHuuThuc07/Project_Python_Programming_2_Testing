@@ -56,11 +56,13 @@ def wrap(a):
 # ── Ray-Cast Sensor ───────────────────────────────────────────
 class RayCastSensor:
     def __init__(self, obs, rng, fov):
-        self.obs  = obs; self.rng = rng
+        self.obs  = obs
+        self.rng = rng
         self.rays = [0.0, fov, -fov]   # center, left, right
 
     def _hit(self, pos, angle, ox, oy, hs):
-        d = np.array([np.cos(angle), np.sin(angle)]); e = 1e-12
+        d = np.array([np.cos(angle), np.sin(angle)])
+        e = 1e-12
         txlo = (ox - hs - pos[0]) / (d[0]+e); txhi = (ox + hs - pos[0]) / (d[0]+e)
         if txlo > txhi: txlo, txhi = txhi, txlo
         tylo = (oy - hs - pos[1]) / (d[1]+e); tyhi = (oy + hs - pos[1]) / (d[1]+e)
