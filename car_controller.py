@@ -27,12 +27,19 @@ _XML    = os.path.join(_HERE, "world.xml")          # same folder as .py
 @dataclass
 class Config:
     xml_path    : str   = _XML
-    start       : tuple = (-6.0, 0.0)
-    goal        : tuple = ( 6.0, 0.0)
+    start       : tuple = (-10.0, 0.0)
+    goal        : tuple = ( 10.0, 0.0)
     obstacles   : list  = field(default_factory=lambda: [
         (-3.0,  1.2, 0.5), (-1.0, -1.0, 0.5),
         ( 2.0,  1.5, 0.5), ( 3.0, -0.3, 0.5),  #replace by  ( 1.0,  1.5, 0.5),( 3.0, -1.3, 0.5) to have new direction for car
-        ( 0.0,  0.0, 0.4),
+        ( 0.0,  0.0, 0.4), ( 5.0,  2.0, 0.6),
+
+        #Wall
+        ( 8.0,  2.0, 0.5),  
+        ( 8.0,  1.0, 0.5),  
+        ( 8.0,  0.0, 0.5),  
+        ( 8.0, -1.0, 0.5),  
+        ( 8.0, -2.0, 0.5)   
     ])
     forward_vel : float = 2.5
     turn_vel    : float = 1.5
