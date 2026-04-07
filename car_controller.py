@@ -13,10 +13,6 @@ MuJoCo Car Simulation — Rule-Based Obstacle Avoidance
 import argparse, os, sys, time, json
 import numpy as np
 import mujoco
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 from dataclasses import dataclass, field
 from typing import List, Tuple
 
