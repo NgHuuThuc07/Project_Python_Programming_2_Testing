@@ -61,6 +61,8 @@ Blocks
 | obs4 | +3.0 | -0.3 | 0.5 |
 | obs5 |  0.0 |  0.0 | 0.4 |
 | obs6 |  5.0 |  2.0 | 0.6 |
+
+---
 Wall
 | Name | X    | Y    | Size|
 |------|------|------|-----|
@@ -145,7 +147,7 @@ Danger threshold: th = 2.0 × 0.52 = 1.04 m
 │  ELIF dr < 0.83m (clipping right wall)              │
 │                  → AVOID_L  (steer left)            │
 │                                                     │
-│  ELSE            → FORWARD  (go straight to goal)  │
+│  ELSE            → FORWARD  (go straight to goal)   │
 └─────────────────────────────────────────────────────┘
 ```
 
