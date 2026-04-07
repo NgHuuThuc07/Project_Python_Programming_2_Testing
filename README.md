@@ -25,7 +25,7 @@ project/
 ## ⚙️ Installation
 
 ```bash
-pip install mujoco mujoco-python-viewer numpy matplotlib
+pip install mujoco mujoco-python-viewer numpy matplotlib.
 ```
 >Python ≥ 3.9, No GPU needed
 
